@@ -1,0 +1,328 @@
+﻿namespace FSUDF2
+
+open System
+open System.Data
+open System.Data.SqlClient
+open System.Data.SqlTypes
+open Microsoft.SqlServer.Server
+open System.Collections
+open System.Collections.Generic
+
+module udtf =
+    let cmd = 
+            @"
+	declare @SQLCMDSTR nvarchar(max) = '
+--CREATE FUNCTION FS.OLD_QUOTATION_CUSTOMER()
+--RETURNS @CUSTOMER TABLE (
+--[ID] [int] ,
+--	[Name] [nvarchar](50) ,
+--	[EnglishName] [nvarchar](200) ,
+--	[CompanyOwner] [nvarchar](20) ,
+--	[Address] [nvarchar](50) ,
+--	[Tel] [varchar](20)  ,
+--	[Fax] [varchar](20) ,
+--	[Capital] [int] ,
+--	[Web] [nvarchar](50) ,
+--	[BusinessNo] [varchar](20)  ,
+--	[Modifier] [int] ,
+--	[ModifyDate] [datetime]  
+--)
+--AS 
+--BEGIN
+DECLARE @FILTER_M FS.FILTERCOLUMN
+INSERT INTO @FILTER_M (
+COLNAME, CAPTION, IFSELECT, ANDOR, OP, LEFTVALUE, RIGHTVALUE
+) VALUES 
+--(
+--''LOCKED'', NULL, 0, 1, 0, ''0'', ''''
+--), 
+(
+''SCMID'', NULL, 0, 1, 6, ''20, 40'', ''''  
+), (
+''CID'', ''ID'', 1, 1, NULL, '''', ''''
+), (
+''CAPITAL'', '''', 1, 1, NULL, '''', ''''
+), (
+''WEB'', '''', 1, 1, NULL, '''', ''''
+), (
+''BUSINESSNO'', '''', 1, 1, NULL, '''', ''''
+), (
+''ISDELETED'', '''', 0, 1, 0, ''0'', ''''
+), (
+''DISABLED'', '''', 0, 1, 0, ''0'', ''''
+)
+
+--SELECT * FROM @FILTER_M
+
+DECLARE @CM TABLE (
+	ID VARCHAR(100), CAPITAL INT, WEB NVARCHAR(50), BUSINESSNO VARCHAR(20)
+)
+INSERT INTO @CM
+EXEC [CRM].[SP_OP_COMPANYMAIN] @OP = 0, @FILTERCOLUMN = @FILTER_M
+
+--SELECT * FROM @CM
+
+
+DECLARE @FILTER_D FS.FILTERCOLUMN
+INSERT INTO @FILTER_D (
+COLNAME, CAPTION, IFSELECT, ANDOR, OP, LEFTVALUE, RIGHTVALUE
+) VALUES 
+--(
+--''LOCKED'', NULL, 0, 1, 0, ''0'', ''''
+--), 
+(
+''SCMID'', NULL, 0, 1, 6, ''20, 40'', ''''  
+), (
+''CDID'', ''ID'', 1, 1, NULL, '''', ''''
+), (
+''NAME'', '''', 1, 1, NULL, '''', ''''
+), (
+''ENGLISHNAME'', '''', 1, 1, NULL, '''', ''''
+),(
+''ACCTID_OWNER'', ''CompanyOwner'', 1, 1, NULL, '''', ''''
+), (
+''ADDRESS'', '''', 1, 1, NULL, '''', ''''
+), (
+''TEL1'', ''Tel'', 1, 1, NULL, '''', ''''
+), (
+''FAX1'', ''Fax'', 1, 1, NULL, '''', ''''
+), (
+''MODIFYUSER_NXT_LATEST'', ''Modifier'', 1, 1, NULL, '''', ''''
+), (
+''MODIFYDATE'', ''ModifyDate'', 1, 1, NULL, '''', ''''
+), (
+''ISDELETED'', '''', 0, 1, 0, ''0'', ''''
+), (
+''DISABLED'', '''', 0, 1, 0, ''0'', ''''
+)
+--SELECT * FROM @FILTER_D
+
+DECLARE @CD TABLE (
+	ID VARCHAR(100), NAME nvarchar(50), ENGLISHNAME NVARCHAR(200), CompanyOwner nvarchar(20), ADDRESS NVARCHAR(50), TEL VARCHAR(20), FAX VARCHAR(20), Modifier INT, ModifyDate DATETIME
+)
+INSERT INTO @CD
+EXEC [CRM].[SP_OP_COMPANYDETAIL] @OP = 0, @FILTERCOLUMN = @FILTER_D
+
+--SELECT * FROM @CD
+
+
+
+
+DECLARE @FILTER_PM FS.FILTERCOLUMN
+INSERT INTO @FILTER_PM (
+COLNAME, CAPTION, IFSELECT, ANDOR, OP, LEFTVALUE, RIGHTVALUE
+) VALUES 
+--(
+--''LOCKED'', NULL, 0, 1, 0, ''0'', ''''
+--), 
+--(
+--''SCMID'', NULL, 0, 1, 6, ''20, 40'', ''''  
+--), 
+(
+''ID_LATEST'', ''ID'', 1, 1, NULL, '''', ''''
+),(
+''PID'', ''OWNERID'', 1, 1, NULL, '''', ''''
+), (
+''NAME'', '''', 1, 1, NULL, '''', ''''
+), (
+''ISDELETED'', '''', 0, 1, 0, ''0'', ''''
+), (
+''DISABLED'', '''', 0, 1, 0, ''0'', ''''
+)
+--SELECT * FROM @FILTER_PM
+
+DECLARE @PM TABLE (
+	ID INT, CUSTID NVARCHAR(300), NAME nvarchar(50)
+)
+INSERT INTO @PM
+EXEC [CRM].[SP_OP_PRINCIPALMAIN] @OP = 0, @FILTERCOLUMN = @FILTER_PM
+
+--SELECT * FROM @PM
+
+DECLARE @FILTER_PPMACCT FS.FILTERCOLUMN
+INSERT INTO @FILTER_PPMACCT (
+COLNAME, CAPTION, IFSELECT, ANDOR, OP, LEFTVALUE, RIGHTVALUE
+) VALUES 
+--(
+--''SCMID'', NULL, 0, 1, 6, ''20, 40'', ''''  
+--), 
+(
+''ID_LATEST'', ''ID'', 1, 1, NULL, '''', ''''
+),(
+''PPMACCTID'', ''CONTACTID'', 1, 1, NULL, '''', ''''
+), (
+''PPMID'', ''PPMID'', 1, 1, NULL, '''', ''''
+), (
+''SYSCORACCTID'', ''ACCTID'', 1, 1, NULL, '''', ''''
+), (
+''ISDELETED'', '''', 0, 1, 0, ''0'', ''''
+), (
+''DISABLED'', '''', 0, 1, 0, ''0'', ''''
+)
+--SELECT * FROM @FILTER_PPMACCT
+
+
+DECLARE @PPMACCT TABLE (
+	ID INT, CONTACTID BIGINT, PPMID BIGINT, SYSCORACCTID BIGINT
+)
+INSERT INTO @PPMACCT
+EXEC [CRM].[SP_OP_PRINCIPALMAINACCOUNT] @op = 0, @FILTERCOLUMN = @FILTER_PPMACCT
+
+--SELECT * FROM @PPMACCT
+
+
+
+SELECT 
+	isnull(try_PARSE(CM.ID AS INT), -1) ID, CD.NAME, CD.EnglishName, PM.NAME CompanyOwner, CD.ADDRESS, CD.TEL, CD.FAX, CM.CAPITAL, CM.WEB, CM.BUSINESSNO
+	, CD.Modifier [Modifier], CD.ModifyDate
+FROM @CM CM
+	LEFT JOIN @CD CD
+		ON CM.ID = CD.ID
+	LEFT JOIN @PPMACCT PPMACCT
+		ON CD.CompanyOwner = PPMACCT.SYSCORACCTID
+	LEFT JOIN @PM PM
+		ON PM.ID = PPMACCT.PPMID
+	--LEFT JOIN @PPMACCT PPMACCT2
+	--	ON CD.Modifier = PPMACCT2.SYSCORACCTID
+	--LEFT JOIN @PM PM2
+	--	ON PM2.ID = PPMACCT2.PPMID
+
+--DECLARE @PPMACCT   [CRM].[TYPVAR_PRINCIPALMAINACCOUNT]
+--INSERT INTO @PPMACCT
+--SELECT PM.CUSTID, PM.ID, PM.ID, 0, NULL, NULL, 50, 50, 0, 1, ''TPEMT'', NULL, NULL
+--FROM @PM PM
+
+--SELECT * FROM @PPMACCT
+
+--DECLARE @SYSCORACCT [CRM].[TYPVAR_SYSTEMCOREACCOUNT]
+--INSERT INTO @SYSCORACCT
+--SELECT PM.CUSTID, 40, 0, 0, NULL, NULL, 50, 50, ''TPEMT'', NULL, 0, 1, NULL, NULL, NULL, NULL
+--FROM @PM PM
+
+--SELECT * FROM @SYSCORACCT
+
+--DECLARE @USER2 BIGINT = 10, @USER BIGINT = 10, @IID BIGINT
+--DECLARE @OP BIGINT = 1, @SCMID BIGINT = 40, @CENTER NVARCHAR(MAX) = ''TPEMT''
+--declare @ERROR_MESSAGE nvarchar(4000)
+
+--EXEC [CRM].[SP_OP_PRINCIPALMAINACCOUNT] @op = 1, @TYPVAR_I = @PPMACCT ,--@tbl_ctntid = @I2,
+--            @CTNTID = -1, @SCMID = @SCMID, @USER = @USER, @CENTER = @CENTER, @ID = @IID output, @ERROR_MESSAGE = @ERROR_MESSAGE output
+--			, @SYSCORACCTID = -1, @TBL_SYSCORACCTID = @SYSCORACCT
+
+--SELECT D.ID, D.NAME, D.ENGLISHNAME,  
+--FROM @CD D INNER JOIN @CM M ON D.ID = M.ID ORDER BY D.ID
+--END
+'
+DECLARE @ParmDefinition nvarchar(500)
+SELECT @ParmDefinition = N''
+EXECUTE sp_executesql
+	@SQLCMDSTR
+	,@ParmDefinition
+        "
+    let ex = fun connStr cmdStr ->
+        let c = 
+            match connStr with
+            | "" -> "Data Source=.;Initial Catalog=DS;Persist Security Info=True;Integrated Security=SSPI;Enlist=false;MultipleActiveResultSets=false;"
+            | _ when connStr.GetType() = typeof<string> -> connStr
+            | _ -> "context connection=true"
+        let c' =
+            match cmdStr with
+            | "" -> cmd
+            | _ when connStr.GetType() = typeof<string> -> cmdStr
+            | _ -> cmd
+        let connection = new SqlConnection(c)
+        connection.Open()
+        let sqlcmd = new SqlCommand(c', connection)
+        let reader = sqlcmd.ExecuteReader()
+        (connection, sqlcmd, reader)
+
+type public customer =
+    class
+        [<DefaultValue>] val mutable ID : Data.SqlTypes.SqlInt32
+        [<DefaultValue>] val mutable Name : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable EnglishName : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable CompanyOwner : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Address : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Tel : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Fax : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Capital : Data.SqlTypes.SqlInt32
+        [<DefaultValue>] val mutable Web : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable BussinessNo : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Modifier : Data.SqlTypes.SqlInt32
+        [<DefaultValue>] val mutable ModifyDate : Data.SqlTypes.SqlDateTime
+        new () ={}
+    end
+
+type public UDFSET = 
+    class        
+        static member Fill(o : obj
+         , id : SqlInt32 byref
+         , name : SqlString byref
+         , englishName : SqlString byref
+         , companyOwner : SqlString byref
+         , address : SqlString byref
+         , tel : SqlString byref
+         , fax : SqlString byref
+         , capital : SqlInt32 byref
+         , web : SqlString byref
+         , bussinessNo : SqlString byref
+         , modifier : SqlInt32 byref
+         , modifyDate : Data.SqlTypes.SqlDateTime byref) =
+            let o' = o :?> customer
+            id <- o'.ID
+            name <- o'.Name
+            englishName <- o'.EnglishName
+            companyOwner <- o'.CompanyOwner
+            address <- o'.Address
+            tel <- o'.Tel
+            fax <- o'.Fax
+            capital <- o'.Capital
+            web <- o'.Web
+            bussinessNo <- o'.BussinessNo
+            modifier <- o'.Modifier
+            modifyDate <- o'.ModifyDate
+        
+        //[<Serializable>]
+        [<SqlFunction(
+            DataAccess = DataAccessKind.Read, 
+            FillRowMethodName = "Fill", TableDefinition = "[ID] [int] ,
+	[Name] [nvarchar](50) ,
+	[EnglishName] [nvarchar](200) ,
+	[CompanyOwner] [nvarchar](20) ,
+	[Address] [nvarchar](50) ,
+	[Tel] [nvarchar](20)  ,
+	[Fax] [nvarchar](20) ,
+	[Capital] [int] ,
+	[Web] [nvarchar](50) ,
+	[BusinessNo] [nvarchar](20)  ,
+	[Modifier] [int] ,
+	[ModifyDate] [datetime]")>]
+        static member queryOldCustomer(conn : string, cmd : string) = 
+            let results = new ArrayList()
+            let (connObj, cmdObj, reader) = udtf.ex conn cmd
+            while reader.Read() do
+                let customer' = new customer()
+                customer'.ID <- reader.GetSqlInt32(0)
+                customer'.Name <- reader.GetSqlString(1)
+                customer'.EnglishName <- reader.GetSqlString(2)
+                customer'.CompanyOwner <- reader.GetSqlString(3)
+                customer'.Address <- reader.GetSqlString(4)
+                customer'.Tel <- reader.GetSqlString(5)
+                customer'.Fax <- reader.GetSqlString(6)
+                customer'.Capital <- reader.GetSqlInt32(7)
+                customer'.Web <- reader.GetSqlString(8)
+                customer'.BussinessNo <- reader.GetSqlString(9)
+                customer'.Modifier <- reader.GetSqlInt32(10)
+                customer'.ModifyDate <- reader.GetSqlDateTime(11)
+                results.Add(customer') |> ignore
+
+            reader.Close()
+            reader.Dispose()
+            cmdObj.Dispose()
+            connObj.Close()
+            connObj.Dispose()
+            results
+
+
+
+    end

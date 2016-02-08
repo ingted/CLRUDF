@@ -1,0 +1,318 @@
+﻿namespace FSUDF2
+
+open System
+open System.Data
+open System.Data.SqlClient
+open System.Data.SqlTypes
+open Microsoft.SqlServer.Server
+open System.Collections
+open System.Collections.Generic
+
+module udtf2 =
+    let cmd = 
+            @"
+DECLARE @SQLCMDSTR NVARCHAR(4000) = N'DECLARE @FILTER_PPM FS.FILTERCOLUMN
+INSERT INTO @FILTER_PPM (
+COLNAME, CAPTION, IFSELECT, ANDOR, OP, LEFTVALUE, RIGHTVALUE
+) VALUES 
+(
+''ID_LATEST'', '''', 1, 1, NULL, '''', ''''
+),(
+''PID'', ''ID'', 1, 1, NULL, '''', ''''
+), (
+''Name'', '''', 1, 1, NULL, '''', ''''
+), (
+''FirstName'', '''', 1, 1, NULL, '''', ''''
+), (
+''LastName'', '''', 1, 1, NULL, '''', ''''
+), (
+''Title'', '''', 1, 1, NULL, '''', ''''
+), (
+''EMail1'', '''', 1, 1, NULL, '''', ''''
+), (
+''EMail2'', '''', 1, 1, NULL, '''', ''''
+), (
+''Tel1'', '''', 1, 1, NULL, '''', ''''
+), (
+''Tel2'', '''', 1, 1, NULL, '''', ''''
+), (
+''Tel1Ext'', '''', 1, 1, NULL, '''', ''''
+), (
+''Tel2Ext'', '''', 1, 1, NULL, '''', ''''
+), (
+''MobileNum1'', '''', 1, 1, NULL, '''', ''''
+), (
+''MobileNum2'', '''', 1, 1, NULL, '''', ''''
+), (
+''HotLine'', '''', 1, 1, NULL, '''', ''''
+), (
+''Fax'', '''', 1, 1, NULL, '''', ''''
+), (
+''Memo'', '''', 1, 1, NULL, '''', ''''
+), (
+''ISDELETED'', '''', 0, 1, 0, ''0'', ''''
+), (
+''DISABLED'', '''', 0, 1, 0, ''0'', ''''
+)
+
+DECLARE @PPM TABLE(
+	ID_LATEST INT,
+	[ID] VARCHAR(MAX) NULL,
+	[Name] [nvarchar](50) NOT NULL,
+	[FirstName] [nvarchar](50) NULL,
+	[LastName] [nvarchar](50) NULL,
+	Title [nvarchar](50) NULL,
+	[EMail1] [nvarchar](50) NULL,
+	[EMail2] [nvarchar](50) NULL,
+	[Tel1] [varchar](20) NULL,
+	[Tel2] [varchar](20) NULL,
+	[Tel1Ext] [varchar](6) NULL,
+	[Tel2Ext] [varchar](6) NULL,
+	[MobileNum1] [varchar](20) NULL,
+	[MobileNum2] [varchar](20) NULL,
+	[HotLine] [varchar](20) NULL,
+	[Fax] [varchar](20) NULL,
+	[Memo] [nvarchar](255) NULL)
+
+INSERT INTO @PPM
+EXEC CRM.SP_OP_PRINCIPALMAIN 0, @FILTERCOLUMN = @FILTER_PPM
+
+DECLARE @FILTER_PPD_CD FS.FILTERCOLUMN
+INSERT INTO @FILTER_PPD_CD (
+COLNAME, CAPTION, IFSELECT, ANDOR, OP, LEFTVALUE, RIGHTVALUE
+) VALUES 
+(
+''ID_LATEST'', '''', 1, 1, NULL, '''', ''''
+),(
+''PID_PSELF'', '''', 1, 1, NULL, '''', ''''
+), (
+''CDVALUE'', '''', 1, 1, 9, '''', ''''
+), (
+''CDTYPEID'', '''', 0, 1, 0, 5, ''''
+), (
+''ISDELETED'', '''', 0, 1, 0, ''0'', ''''
+), (
+''DISABLED'', '''', 0, 1, 0, ''0'', ''''
+)
+DECLARE @PPD_CD TABLE (
+	ID_LATEST BIGINT,
+	PID_PSELF BIGINT,
+	CDVALUE BIGINT
+)
+
+INSERT INTO @PPD_CD
+EXEC CRM.SP_OP_PRINCIPALDETAIL 0, @FILTERCOLUMN = @FILTER_PPD_CD
+
+
+DECLARE @FILTER_CD FS.FILTERCOLUMN
+INSERT INTO @FILTER_CD (
+COLNAME, CAPTION, IFSELECT, ANDOR, OP, LEFTVALUE, RIGHTVALUE
+) VALUES 
+(
+''ID_LATEST'', '''', 1, 1, NULL, '''', ''''
+),(
+''CDID'', ''CustomerID'', 1, 1, NULL, '''', ''''
+), (
+''NAME'', ''Department'', 1, 1, NULL, '''', ''''
+), (
+''ISDELETED'', '''', 0, 1, 0, ''0'', ''''
+), (
+''DISABLED'', '''', 0, 1, 0, ''0'', ''''
+)
+DECLARE @PPDCD TABLE (
+	ID_LATEST BIGINT,
+	CustomerID VARCHAR(MAX),
+	Department NVARCHAR(MAX)
+)
+
+INSERT INTO @PPDCD
+EXEC CRM.SP_OP_COMPANYDETAIL 0, @FILTERCOLUMN = @FILTER_CD
+
+DECLARE @FILTER_PPD_DEPT FS.FILTERCOLUMN
+INSERT INTO @FILTER_PPD_DEPT (
+COLNAME, CAPTION, IFSELECT, ANDOR, OP, LEFTVALUE, RIGHTVALUE
+) VALUES 
+(
+''ID_LATEST'', '''', 1, 1, NULL, '''', ''''
+),(
+''PID_PSELF'', '''', 1, 1, NULL, '''', ''''
+), (
+''CDVALUE'', '''', 1, 1, 9, '''', ''''
+), (
+''CDTYPEID'', '''', 0, 1, 0, 7, ''''
+), (
+''SCMID'', '''', 0, 1, NULL, 40, ''''
+), (
+''ISDELETED'', '''', 0, 1, 0, ''0'', ''''
+), (
+''DISABLED'', '''', 0, 1, 0, ''0'', ''''
+)
+DECLARE @PPDCD_DEPT TABLE (
+	ID_LATEST BIGINT,
+	PID_PSELF BIGINT,
+	CDVALUE BIGINT
+)
+
+INSERT INTO @PPDCD_DEPT
+EXEC CRM.SP_OP_PRINCIPALDETAIL 0, @FILTERCOLUMN = @FILTER_PPD_DEPT
+
+select 
+	ISNULL(TRY_PARSE(PPM.[ID] AS INT), -1) ID, PPM.[Name], PPM.[FirstName], PPM.[LastName], DEPT.[Department], PPM.[Title], PPM.[EMail1]
+	, PPM.[EMail2], PPM.[Tel1], PPM.[Tel2], PPM.[Tel1Ext], PPM.[Tel2Ext], PPM.[MobileNum1], PPM.[MobileNum2]
+    , PPM.[HotLine], PPM.[Fax], PPM.[Memo], ISNULL(TRY_PARSE(CD.CustomerID AS INT), -1) [CustomerID]
+from @PPM PPM 
+	LEFT JOIN @PPD_CD PP_CD
+		ON PPM.ID_LATEST = PP_CD.PID_PSELF
+	LEFT JOIN @PPDCD CD
+		ON PP_CD.CDVALUE = CD.ID_LATEST
+	LEFT JOIN @PPDCD_DEPT PP_DEPT
+		ON PPM.ID_LATEST = PP_DEPT.PID_PSELF
+	LEFT JOIN @PPDCD DEPT
+		ON PP_DEPT.CDVALUE = DEPT.ID_LATEST
+'
+DECLARE @ParmDefinition nvarchar(500)
+SELECT @ParmDefinition = N''
+EXECUTE sp_executesql
+	@SQLCMDSTR
+	,@ParmDefinition	
+        "
+    let ex = fun connStr cmdStr ->
+        let c = 
+            match connStr with
+            | "" -> "Data Source=.;Initial Catalog=DS;Persist Security Info=True;Integrated Security=SSPI;Enlist=false;MultipleActiveResultSets=false;"
+            | _ when connStr.GetType() = typeof<string> -> connStr
+            | _ -> "context connection=true"
+        let c' =
+            match cmdStr with
+            | "" -> cmd
+            | _ when connStr.GetType() = typeof<string> -> cmdStr
+            | _ -> cmd
+        let connection = new SqlConnection(c)
+        connection.Open()
+        let sqlcmd = new SqlCommand(c', connection)
+        let reader = sqlcmd.ExecuteReader()
+        (connection, sqlcmd, reader)
+
+type public Contact =
+    class
+        [<DefaultValue>] val mutable ID : Data.SqlTypes.SqlInt32
+        [<DefaultValue>] val mutable Name : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable FirstName : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable LastName : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Department : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Title : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable EMail1 : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable EMail2 : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Tel1 : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Tel2 : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Tel1Ext : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Tel2Ext : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable MobileNum1 : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable MobileNum2 : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable HotLine : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Fax : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable Memo : Data.SqlTypes.SqlString
+        [<DefaultValue>] val mutable CustomerID : Data.SqlTypes.SqlInt32
+        new () ={}
+    end
+
+type public UDFSET2 = 
+    //class        
+        static member Fill(o : obj
+
+        , id : SqlInt32 byref
+        , name : SqlString byref
+        , firstName : SqlString byref
+        , lastName : SqlString byref
+        , department : SqlString byref
+        , title : SqlString byref
+        , eMail1 : SqlString byref
+        , eMail2 : SqlString byref
+        , tel1 : SqlString byref
+        , tel2 : SqlString byref
+        , tel1Ext : SqlString byref
+        , tel2Ext : SqlString byref
+        , mobileNum1 : SqlString byref
+        , mobileNum2 : SqlString byref
+        , hotLine : SqlString byref
+        , fax : SqlString byref
+        , memo : SqlString byref
+        , customerID : SqlInt32 byref) =
+            let o' = o :?> Contact
+            id <- o'.ID
+            name <- o'.Name
+            firstName <- o'.FirstName
+            lastName <- o'.LastName
+            department <- o'.Department
+            title <- o'.Title
+            eMail1 <- o'.EMail1
+            eMail2 <- o'.EMail2
+            tel1 <- o'.Tel1
+            tel2 <- o'.Tel2
+            tel1Ext <- o'.Tel1Ext
+            tel2Ext <- o'.Tel2Ext
+            mobileNum1 <- o'.MobileNum1
+            mobileNum2 <- o'.MobileNum2
+            hotLine <- o'.HotLine
+            fax <- o'.Fax
+            memo <- o'.Memo
+            customerID <- o'.CustomerID
+        
+        //[<Serializable>]
+        [<SqlFunction(
+            DataAccess = DataAccessKind.Read, 
+            FillRowMethodName = "Fill", TableDefinition = "[ID] [int],
+	[Name] [nvarchar](50) ,
+	[FirstName] [nvarchar](50) ,
+	[LastName] [nvarchar](50) ,
+	[Department] [nvarchar](50) ,
+	[Title] [nvarchar](50) ,
+	[EMail1] [nvarchar](50) ,
+	[EMail2] [nvarchar](50) ,
+	[Tel1] [nvarchar](20) ,
+	[Tel2] [nvarchar](20) ,
+	[Tel1Ext] [nvarchar](6) ,
+	[Tel2Ext] [nvarchar](6) ,
+	[MobileNum1] [nvarchar](20) ,
+	[MobileNum2] [nvarchar](20) ,
+	[HotLine] [nvarchar](20) ,
+	[Fax] [nvarchar](20) ,
+	[Memo] [nvarchar](255) ,
+	[CustomerID] [int]")>]
+        static member queryOldContact(conn : string, cmd : string) = 
+            let results = new ArrayList()
+            let (connObj, cmdObj, reader) = udtf2.ex conn cmd
+            while reader.Read() do
+                let contact' = new Contact()
+
+
+                contact'.ID <- reader.GetSqlInt32(0)
+                contact'.Name <- reader.GetSqlString(1)
+                contact'.FirstName <- reader.GetSqlString(2)
+                contact'.LastName <- reader.GetSqlString(3)
+                contact'.Department <- reader.GetSqlString(4)
+                contact'.Title <- reader.GetSqlString(5)
+                contact'.EMail1 <- reader.GetSqlString(6)
+                contact'.EMail2 <- reader.GetSqlString(7)
+                contact'.Tel1 <- reader.GetSqlString(8)
+                contact'.Tel2 <- reader.GetSqlString(9)
+                contact'.Tel1Ext <- reader.GetSqlString(10)
+                contact'.Tel2Ext <- reader.GetSqlString(11)
+                contact'.MobileNum1 <- reader.GetSqlString(12)
+                contact'.MobileNum2 <- reader.GetSqlString(13)
+                contact'.HotLine <- reader.GetSqlString(14)
+                contact'.Fax <- reader.GetSqlString(15)
+                contact'.Memo <- reader.GetSqlString(16)
+                contact'.CustomerID <- reader.GetSqlInt32(17)
+                results.Add(contact') |> ignore
+
+            reader.Close()
+            reader.Dispose()
+            cmdObj.Dispose()
+            connObj.Close()
+            connObj.Dispose()
+            results
+
+
+
+    //end
