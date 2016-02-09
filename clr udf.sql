@@ -1,10 +1,13 @@
-﻿alter database DARKNET set trustworthy on
+﻿CREATE DATABASE test_clr2
+go
+
+alter database test_clr2 set trustworthy on
 go
 
 CREATE ASSEMBLY [FSharp.Core]
 AUTHORIZATION [dbo]
 from 'C:\FSharp.Core.dll'
-with permission_set = unsafe
+with permission_set = safe
 GO
 
 BEGIN TRY 
