@@ -51,6 +51,11 @@ namespace CSUDF_REGEX {
                     return "-1";
             }
         }
+
+        public static string regexFun(string target, string expr, object g, regexAct ra, string replStr, int replCnt, int replStart) {
+            var o = Regex.Matches("", "");
+            return regexFun(target, expr, g, ra, replStr, replCnt, replStart, ref o);
+        }
     }
 
     public class SPParameters {
@@ -85,7 +90,7 @@ namespace CSUDF_REGEX {
                 [ParamType][nvarchar](50),
                 [ParamDefaultValueSQLStr][nvarchar](max),
                 [ParamDefaultValue][nvarchar](max)")]
-        public static GetSPParamDefaultValue(string spDefinition) {
+        public static ArrayList GetSPParamDefaultValue(string spDefinition) {
             var results = new ArrayList();
             MatchCollection o = null;
             string expr =
@@ -96,32 +101,34 @@ namespace CSUDF_REGEX {
                 "'))\\s*(,|\\))";
             regexUtil.regexFun(spDefinition, expr, null, (regexUtil.regexAct)2, null, 0, 0, ref o);
             int idx = 0;
-            foreach (Match m in o) { 
-                    let spparam' = new SPParameters()
-                spparam'.ParamID <- new SqlInt32(idx)
-                spparam'.ParamName <- new SqlString(m.Groups.["nm"].Value)
-                spparam'.ParamType <- new SqlString(m.Groups.["type"].Value)
-                spparam'.ParamDefaultStr <- new SqlString(m.Groups.["defvalueStr"].Value)
-                spparam'.ParamDefaultValue <- new SqlString(m.Groups.["defvalue"].Value)
-                idx < -idx + 1
-                results.Add(spparam') |> ignore
-            results
+            foreach (Match m in o) {
+                var spparam = new SPParameters();
+                spparam.ParamID = new SqlInt32(idx);
+                spparam.ParamName = new SqlString(m.Groups["nm"].Value);
+                spparam.ParamType = new SqlString(m.Groups["type"].Value);
+                spparam.ParamDefaultStr = new SqlString(m.Groups["defvalueStr"].Value);
+                spparam.ParamDefaultValue = new SqlString(m.Groups["defvalue"].Value);
+                idx++;
+                results.Add(spparam);
+            }
+            return results;
         }
-    [< SqlFunction(IsDeterministic = true, IsPrecise = true) >]
-        static member regexMatch(target : string, expr : string) =
-            let regex = new Regex(expr, RegexOptions.Multiline + RegexOptions.IgnoreCase)
-            regex.IsMatch(target)
-
-    [<SqlFunction(IsDeterministic = true, IsPrecise = true)>]
-        static member regexVarMatchNm(target : string, expr : string, group : string) =
+        [SqlFunction(IsDeterministic = true, IsPrecise = true)]
+        public static bool regexMatch(string target, string expr) {
+            var regex = new Regex(expr, RegexOptions.Multiline & RegexOptions.IgnoreCase);
+            return regex.IsMatch(target);
+        }
+        [SqlFunction(IsDeterministic = true, IsPrecise = true)]
+        public static string regexVarMatchNm(string target, string expr, string group) {
+            return (string)regexUtil.regexFun(target, expr, group, 0, null, 0, 0);
+        }
+    [SqlFunction(IsDeterministic = true, IsPrecise = true)]
+    public static member regexVarMatchId(target : string, expr : string, group : int) =
             (string)(regexUtil.regexFun target expr group 0 null 0 0 None)
-
-    [<SqlFunction(IsDeterministic = true, IsPrecise = true)>]
-        static member regexVarMatchId(target : string, expr : string, group : int) =
-            (string)(regexUtil.regexFun target expr group 0 null 0 0 None)
- 
-    [<SqlFunction(IsDeterministic = true, IsPrecise = true)>]
-        static member regexReplace(target : string, expr : string, replacement : string) =
+        }
+        [SqlFunction(IsDeterministic = true, IsPrecise = true)]
+        public static member regexReplace(target : string, expr : string, replacement : string) =
             (string)(regexUtil.regexFun target expr null 1 replacement -1 0 None)
+        }
     }
 }
