@@ -1,0 +1,6 @@
+E:\CLR_String\test\bin\Debug\test.exe.config
+E:\CLR_String\test\bin\Debug\test.exe
+E:\CLR_String\test\bin\Debug\test.pdb
+E:\CLR_String\test\obj\Debug\test.csprojResolveAssemblyReference.cache
+E:\CLR_String\test\obj\Debug\test.exe
+E:\CLR_String\test\obj\Debug\test.pdb

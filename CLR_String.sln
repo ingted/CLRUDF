@@ -7,6 +7,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "CLR_UDF", "CLR_UDF\CLR_UDF.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CLR_UDF_CS", "CLR_UDF_CS\CLR_UDF_CS.csproj", "{2F7CFF91-149B-4571-A5FE-62525257CE38}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test", "test\test.csproj", "{26248E10-33D4-44DF-9D1A-AB8A3A4E3C48}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{2F7CFF91-149B-4571-A5FE-62525257CE38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F7CFF91-149B-4571-A5FE-62525257CE38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2F7CFF91-149B-4571-A5FE-62525257CE38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26248E10-33D4-44DF-9D1A-AB8A3A4E3C48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26248E10-33D4-44DF-9D1A-AB8A3A4E3C48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26248E10-33D4-44DF-9D1A-AB8A3A4E3C48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26248E10-33D4-44DF-9D1A-AB8A3A4E3C48}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

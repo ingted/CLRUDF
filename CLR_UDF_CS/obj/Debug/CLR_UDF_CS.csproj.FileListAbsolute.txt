@@ -1,5 +1,4 @@
 E:\CLR_String\CLR_UDF_CS\bin\Debug\CLR_UDF_CS.dll
 E:\CLR_String\CLR_UDF_CS\bin\Debug\CLR_UDF_CS.pdb
-E:\CLR_String\CLR_UDF_CS\obj\Debug\CLR_UDF_CS.csprojResolveAssemblyReference.cache
 E:\CLR_String\CLR_UDF_CS\obj\Debug\CLR_UDF_CS.dll
 E:\CLR_String\CLR_UDF_CS\obj\Debug\CLR_UDF_CS.pdb

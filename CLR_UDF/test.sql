@@ -27,13 +27,13 @@ GO
 
 
 
-CREATE ASSEMBLY [CLR_UDF_CS]
+CREATE ASSEMBLY [CLR_UDF]
 AUTHORIZATION [dbo]
-from 'E:\CLR_String\CLR_UDF_CS\bin\Debug\CLR_UDF_CS.dll'
+from 'E:\CLR_String\CLR_UDF\bin\Debug\CLR_UDF.dll'
 with permission_set = safe
 GO
 */
-use test_clr2
+use test_clr
 go
 
 
@@ -173,7 +173,7 @@ END CATCH
 go
 
 BEGIN TRY 
-drop ASSEMBLY [CLR_UDF_CS]
+drop ASSEMBLY [CLR_UDF]
 END TRY 
 BEGIN CATCH
 AAA:
@@ -181,9 +181,9 @@ END CATCH
 go
 
 begin try
-CREATE ASSEMBLY [CLR_UDF_CS]
+CREATE ASSEMBLY [CLR_UDF]
 AUTHORIZATION [dbo]
-from 'E:\CLR_String\CLR_UDF_CS\bin\Debug\CLR_UDF_CS.dll'
+from 'E:\CLR_String\CLR_UDF\bin\Debug\CLRUDF.dll'
 with permission_set = safe
 end try
 begin catch 
@@ -195,83 +195,83 @@ GO
 
 CREATE FUNCTION dbo.regexMatch(@target nvarchar(max), @expr nvarchar(max))
 RETURNS bit
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_REGEX.UDF_REGEX].regexMatch
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_REGEX.UDF_REGEX].regexMatch
 go
 
 CREATE FUNCTION dbo.regexVarMatchId(@target nvarchar(max), @expr nvarchar(max), @group int)
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_REGEX.UDF_REGEX].regexVarMatchId
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_REGEX.UDF_REGEX].regexVarMatchId
 go
 
 CREATE FUNCTION dbo.regexVarMatchNm(@target nvarchar(max), @expr nvarchar(max), @group nvarchar(max))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_REGEX.UDF_REGEX].regexVarMatchNm
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_REGEX.UDF_REGEX].regexVarMatchNm
 go
 
-CREATE FUNCTION dbo.regexVarMatchId2(@target nvarchar(max), @expr nvarchar(max), @group int, @capture int)
+/*CREATE FUNCTION dbo.regexVarMatchId2(@target nvarchar(max), @expr nvarchar(max), @group int, @capture int)
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_REGEX.UDF_REGEX].regexVarMatchId2
-go
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_REGEX.UDF_REGEX].regexVarMatchId2
+go*/
 
-CREATE FUNCTION dbo.regexVarMatchNm2(@target nvarchar(max), @expr nvarchar(max), @group nvarchar(max), @capture int)
+/*CREATE FUNCTION dbo.regexVarMatchNm2(@target nvarchar(max), @expr nvarchar(max), @group nvarchar(max), @capture int)
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_REGEX.UDF_REGEX].regexVarMatchNm2
-go
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_REGEX.UDF_REGEX].regexVarMatchNm2
+go*/
 
 CREATE FUNCTION dbo.regexReplace(@target nvarchar(max), @expr nvarchar(max), @repl nvarchar(max))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_REGEX.UDF_REGEX].regexReplace
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_REGEX.UDF_REGEX].regexReplace
 go
 
 CREATE FUNCTION dbo.GetFileName(@path nvarchar(max))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_FILESYS.UDF_FILESYS].GetFileNameFromPath
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_FILESYS.UDF_FILESYS].GetFileNameFromPath
 go
 
 CREATE FUNCTION dbo.GetFileBaseName(@path nvarchar(max))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_FILESYS.UDF_FILESYS].GetFileBaseNameFromPath
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_FILESYS.UDF_FILESYS].GetFileBaseNameFromPath
 go
 
 CREATE FUNCTION dbo.GetFileDirectory(@path nvarchar(max))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_FILESYS.UDF_FILESYS].GetFileDirectoryFromPath
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_FILESYS.UDF_FILESYS].GetFileDirectoryFromPath
 go
 
 CREATE FUNCTION dbo.GetDirectoryName(@path nvarchar(max))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_FILESYS.UDF_FILESYS].GetDirectoryNameFromPath
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_FILESYS.UDF_FILESYS].GetDirectoryNameFromPath
 go
 
 CREATE FUNCTION dbo.GetFileExtension(@path nvarchar(max))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_FILESYS.UDF_FILESYS].GetFileExtensionFromPath
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_FILESYS.UDF_FILESYS].GetFileExtensionFromPath
 go
 
 CREATE FUNCTION dbo.GetFileContent(@path nvarchar(max))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_FILESYS.UDF_FILESYS].GetFileContentFromPath
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_FILESYS.UDF_FILESYS].GetFileContentFromPath
 go
 
 CREATE FUNCTION dbo.GetDirectoryFullName(@path nvarchar(max))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_FILESYS.UDF_FILESYS].GetDirectoryFullNameFromPath
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_FILESYS.UDF_FILESYS].GetDirectoryFullNameFromPath
 go
 
 
 CREATE FUNCTION dbo.PadLeft(@str nvarchar(max), @len int, @char nchar(1))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_STR.UDF_STR].PadLeft
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_STR.UDF_STR].PadLeft
 go
 
 CREATE FUNCTION dbo.PadRight(@str nvarchar(max), @len int, @char nchar(1))
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_STR.UDF_STR].PadRight
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_STR.UDF_STR].PadRight
 go
 
-CREATE FUNCTION dbo.SQLFUN(@conn nvarchar(max), @cmd nvarchar(max), @r int, @c int, @db nvarchar(max), @server nvarchar(max))
+CREATE FUNCTION dbo.SQLFUN(@conn nvarchar(max), @cmd nvarchar(max), @r int, @c int)
 RETURNS nvarchar(max)
-AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_SQLFUN.UDF_SQLFUN].SQLFUN
+AS EXTERNAL NAME  [CLR_UDF].[FSUDF_SQLFUN.UDF_SQLFUN].SQLFUN
 go
 
 CREATE FUNCTION dbo.GetSPParamDef (@STR NVARCHAR(MAX))
@@ -283,12 +283,12 @@ RETURNS TABLE
 				[ParamDefaultStr] [nvarchar](max),
 	            [ParamDefaultValue] [nvarchar](max)
 )
-EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_REGEX.UDF_REGEX].GetSPParamDefaultValue
+EXTERNAL NAME  [CLR_UDF].[FSUDF_REGEX.UDF_REGEX].GetSPParamDefaultValue
 GO
 IF (select dbo.regexMatch(N'orz', N'd')) = 0 BEGIN PRINT 'regexMatch: pos OK!' END
 IF (select dbo.regexMatch(N'ddt', N'd')) = 1 BEGIN PRINT 'regexMatch: neg OK!' END
 
-
+/*
 if (select dbo.regexVarMatchId2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 0, 0)) = 'odddoddoo'	BEGIN PRINT 'TEST001 - regexVarMatchId2: 0, 0 OK!' END
 if (select dbo.regexVarMatchId2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 0, 1)) = 'err:-2'		BEGIN PRINT 'TEST002 - regexVarMatchId2: 0, 1 OK!' END
 if (select dbo.regexVarMatchId2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 1, 0)) = 'o'			BEGIN PRINT 'TEST003 - regexVarMatchId2: 1, 0 OK!' END
@@ -302,7 +302,7 @@ if (select dbo.regexVarMatchNm2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 't'
 if (select dbo.regexVarMatchNm2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 't', 1)) = 'o'			BEGIN PRINT 'TEST010 - regexVarMatchNm2: t, 1 OK!' END
 if (select dbo.regexVarMatchNm2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 't', 2)) = 'oo'		BEGIN PRINT 'TEST011 - regexVarMatchNm2: t, 2 OK!' END
 if (select dbo.regexVarMatchNm2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 't', 3)) = 'err:-2'	BEGIN PRINT 'TEST012 - regexVarMatchNm2: t, 3 OK!' END
-
+*/
 
 
 
@@ -319,7 +319,7 @@ select dbo.GetFileContent('C:\CLR_UDF.XML')
 select dbo.GetDirectoryName(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\.ini')
 select dbo.GetDirectoryFullName(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\.ini')
 select dbo.GetFileDirectory(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\ConfigurationFile.ini')*/
-select dbo.SQLFUN('context connection=true', 'select 1', 0, 0, 'test_clr2', 'localhost\SQL16')
+select dbo.SQLFUN('context connection=true', 'select 1 a', 0, 0)
 
 
 

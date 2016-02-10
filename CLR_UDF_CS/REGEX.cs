@@ -17,56 +17,52 @@ namespace CSUDF_REGEX {
             Matches = 2,
         };
 
-        public static string regexFun(string target, string expr, object g, int rai, string replStr, int replCnt, int replStart, ref MatchCollection o){
-            regexAct ra = (regexAct)rai;
-            return regexFun(target, expr, g, ra, replStr, replCnt, replStart, ref o);
-        }
-
-        public static string regexFun(string target, string expr, object g, int rai, string replStr, int replCnt, int replStart)
+        public static string regexFun(string target, string expr, object g, int rai, string replStr, int replCnt, int replStart, ref MatchCollection o, int capID)
         {
             regexAct ra = (regexAct)rai;
-            return regexFun(target, expr, g, ra, replStr, replCnt, replStart);
+            return regexFun(target, expr, g, ra, replStr, replCnt, replStart, ref o, capID);
         }
 
-        public static string regexFun(string target, string expr, object g, regexAct ra, string replStr, int replCnt, int replStart, ref MatchCollection o) {
-            int gn = 0;
-            Regex regex = new Regex(expr, RegexOptions.Multiline & RegexOptions.IgnoreCase);
-            switch (ra) {
-                case regexAct.Match:
-                    var varMatch = regex.Match(target);
-                    if (!varMatch.Success)
-                    {
-                        return null;
-                    }
-                    else {
-                        if (Array.Exists(regex.GetGroupNames(), gpnm => (gpnm == g.ToString())))
-                        {
-                            return varMatch.Groups[g.ToString()].Captures[0].Value;
+        public static string regexFun(string target, string expr, object g, int rai, string replStr, int replCnt, int replStart, int capID)
+        {
+            regexAct ra = (regexAct)rai;
+            return regexFun(target, expr, g, ra, replStr, replCnt, replStart, capID);
+        }
+
+        public static string regexFun(string target, string expr, object g, regexAct ra, string replStr, int replCnt, int replStart, ref MatchCollection o, int capID) {
+            int gn = g is int ? Int32.Parse(g.ToString()) : 0;
+            if (capID < 0) { capID = 0; }
+            Regex regex = new Regex(expr, RegexOptions.Multiline | RegexOptions.IgnoreCase);
+            try {
+                switch (ra) {
+                    case regexAct.Match:
+                        var varMatch = regex.Match(target);
+                        if (!varMatch.Success) {
+                            return null;
+                        } else if (g is String && Array.Exists(regex.GetGroupNames(), gpnm => (gpnm == g.ToString()))) {
+                            return varMatch.Groups[g.ToString()].Captures[capID].Value;
+                        } else if (g is int || Int32.TryParse(g.ToString(), out gn)) {
+                            return varMatch.Groups[gn].Captures[capID].Value;
+                        } else {
+                            return varMatch.Groups[0].Captures[capID].Value;
                         }
-                        else {
-                            if (Int32.TryParse(g.ToString(), out gn))
-                            {
-                                return varMatch.Groups[gn].Captures[0].Value;
-                            }
-                            else {
-                                return varMatch.Groups[0].Captures[0].Value;
-                            }
-                        }
-                    }
-                case regexAct.Replace:
-                    return regex.Replace(target, (string)replStr, replCnt, replStart);
-                case regexAct.Matches:
-                    var ms = regex.Matches(target);
-                    o = ms;
-                    return "0";
-                default:
-                    return "-1";
+                    case regexAct.Replace:
+                        return regex.Replace(target, (string)replStr, replCnt, replStart);
+                    case regexAct.Matches:
+                        var ms = regex.Matches(target);
+                        o = ms;
+                        return "0";
+                    default:
+                        return "err:-1";
+                }
+            } catch{
+                return "err:-2";
             }
         }
 
-        public static string regexFun(string target, string expr, object g, regexAct ra, string replStr, int replCnt, int replStart) {
+        public static string regexFun(string target, string expr, object g, regexAct ra, string replStr, int replCnt, int replStart, int capID) {
             var o = Regex.Matches("", "");
-            return regexFun(target, expr, g, ra, replStr, replCnt, replStart, ref o);
+            return regexFun(target, expr, g, ra, replStr, replCnt, replStart, ref o, capID);
         }
     }
 
@@ -111,7 +107,7 @@ namespace CSUDF_REGEX {
                 "(?<defvalueStr>((?<!(?-i)N*')(?<defvalue>\\w+)\\s*)|((?-i)N*'" +
                 "(?<defvalue>(((?<![^']')''(?!'[^']))|([^']))*)" +
                 "'))\\s*(,|\\))";
-            regexUtil.regexFun(spDefinition, expr, null, (regexUtil.regexAct)2, null, 0, 0, ref o);
+            regexUtil.regexFun(spDefinition, expr, null, (regexUtil.regexAct)2, null, 0, 0, ref o, -1);
             int idx = 0;
             foreach (Match m in o) {
                 var spparam = new SPParameters();
@@ -132,15 +128,26 @@ namespace CSUDF_REGEX {
         }
         [SqlFunction(IsDeterministic = true, IsPrecise = true)]
         public static string regexVarMatchNm(string target, string expr, string group) {
-            return (string)regexUtil.regexFun(target, expr, group, 0, null, 0, 0);
+            return (string)regexUtil.regexFun(target, expr, group, 0, null, 0, 0, 0);
         }
         [SqlFunction(IsDeterministic = true, IsPrecise = true)]
         public static string regexVarMatchId(string target, string expr, int group) {
-            return (string)regexUtil.regexFun(target, expr, group, 0, null, 0, 0);
-        }
+            return (string)regexUtil.regexFun(target, expr, group, 0, null, 0, 0, 0);
+        }   
         [SqlFunction(IsDeterministic = true, IsPrecise = true)]
         public static string regexReplace(string target, string expr, string replacement) {
-            return (string)regexUtil.regexFun(target, expr, null, 1, replacement, -1, 0);
+            return (string)regexUtil.regexFun(target, expr, null, 1, replacement, -1, 0, -1);
+        }
+
+        [SqlFunction(IsDeterministic = true, IsPrecise = true)]
+        public static string regexVarMatchNm2(string target, string expr, string group, int capID)
+        {
+            return (string)regexUtil.regexFun(target, expr, group, 0, null, 0, 0, capID);
+        }
+        [SqlFunction(IsDeterministic = true, IsPrecise = true)]
+        public static string regexVarMatchId2(string target, string expr, int group, int capID)
+        {
+            return (string)regexUtil.regexFun(target, expr, group, 0, null, 0, 0, capID);
         }
     }
 }

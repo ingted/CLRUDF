@@ -1,5 +1,10 @@
 ﻿namespace FSUDF_SQLFUN
+(*
+#r "C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.6\\System.Transactions.dll"
+#r "C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.6\\System.Data.dll"
 
+
+*)
 open System
 open System.Data
 open System.Data.SqlClient
@@ -11,43 +16,59 @@ open System.Collections.Generic
 
 module funUtil =   
     let ex = fun connStr cmdStr ->
-        let c = 
-            match connStr with
-            | "" -> 
-                "Data Source=.;Initial Catalog=DARKNET;Persist Security Info=True;Integrated Security=SSPI;Enlist=false;MultipleActiveResultSets=false;"
-            | _ when connStr.GetType() = typeof<string> -> 
-                connStr
-            | _ -> 
-                "context connection=true"
-        let connection = new SqlConnection(c)
-        connection.Open()
-        let sqlcmd = new SqlCommand(cmdStr, connection)
-        //let reader = sqlcmd.ExecuteReader()
-        //(connection, sqlcmd, reader)
 
-        let da = new SqlDataAdapter(sqlcmd)
-        let ds = new DataSet()
-        let fill = da.Fill(ds)
-        da.Dispose()
-        sqlcmd.Dispose()
-        connection.Close()
-        connection.Dispose()
-        ds
+        match connStr with
+        | "context connection=true" | _ when connStr.GetType() <> typeof<string> ->
+            let c = "context connection=true"
+            //let reader = sqlcmd.ExecuteReader()
+            //(connection, sqlcmd, reader)
+            let connection = new SqlConnection(c)
+            connection.Open()
+            let sqlcmd = new SqlCommand(cmdStr, connection)
+            let rdr = sqlcmd.ExecuteReader()
+            SqlContext.Pipe.Send(rdr) 
+            rdr.Close()
+            connection.Close()
+            let ds = new DataSet()
+            ds
+        | _ (*when connStr.GetType() = typeof<string>*) ->
+            let c = 
+                match connStr with
+                | "" -> 
+                    "Data Source=localhost\SQL16;Initial Catalog=master;Persist Security Info=True;Integrated Security=SSPI;Enlist=false;MultipleActiveResultSets=false;"
+                | _ ->
+                    connStr
+            let connection = new SqlConnection(c)
+            connection.Open()
+            let sqlcmd = new SqlCommand(cmdStr, connection)
+            let da = new SqlDataAdapter(sqlcmd)
+            let ds = new DataSet()
+            let fill = da.Fill(ds)
+            da.Dispose()
+            sqlcmd.Dispose()
+            connection.Close()
+            connection.Dispose()
+            ds
         ;
 
-
+        //DataAccessKind.Read or SystemDataAccessKind.Read
 type public UDF_SQLFUN = 
-    [<SqlFunction(IsDeterministic = false, IsPrecise = true)>]
+    [<SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)>]
         static member SQLFUN(conn : string, cmd : string, r : int, c : int) =
             let results = new ArrayList()
-            let ds = funUtil.ex conn cmd
-            let i = ds.Tables.[0].Rows.[r].Item(c) 
-            match i with
-            | :? System.DBNull ->
+            match conn with
+            | "context connection=true" | _ when conn.GetType() <> typeof<string> ->
+                let last = funUtil.ex conn cmd
                 System.Data.SqlTypes.SqlString.Null
             | _ ->
-                //i :?> System.Data.SqlTypes.SqlString
-                new System.Data.SqlTypes.SqlString(i.ToString())
+                let ds = funUtil.ex conn cmd
+                let i = ds.Tables.[0].Rows.[r].Item(c) 
+                match i with
+                | :? System.DBNull ->
+                    System.Data.SqlTypes.SqlString.Null
+                | _ ->
+                    //i :?> System.Data.SqlTypes.SqlString
+                    new System.Data.SqlTypes.SqlString(i.ToString())
 
 
     [<SqlFunction(IsDeterministic = false, IsPrecise = true)>]
