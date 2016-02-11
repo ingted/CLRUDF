@@ -184,7 +184,7 @@ begin try
 CREATE ASSEMBLY [CLR_UDF_CS]
 AUTHORIZATION [dbo]
 from 'E:\CLR_String\CLR_UDF_CS\bin\Debug\CLR_UDF_CS.dll'
-with permission_set = safe
+with permission_set = unsafe
 end try
 begin catch 
 aaa:
@@ -319,8 +319,11 @@ select dbo.GetFileContent('C:\CLR_UDF.XML')
 select dbo.GetDirectoryName(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\.ini')
 select dbo.GetDirectoryFullName(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\.ini')
 select dbo.GetFileDirectory(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\ConfigurationFile.ini')*/
-select dbo.SQLFUN('context connection=true', 'select 1', 0, 0, 'test_clr2', 'localhost\SQL16')
-
+if (select dbo.SQLFUN('context connection=true', 'select db_name()', 0, 0, 'test_clr2', 'localhost\SQL16')) = 'test_clr2' BEGIN PRINT 'TEST016 - SQLFUN: OK!' END
+if (select dbo.SQLFUN('context connection=true', 'select 1 a', 0, 0, 'test_clr2', '')) + 1 = 2  BEGIN PRINT 'TEST017 - SQLFUN: OK!' END
+if (select dbo.SQLFUN('context connection=true', 'select 1 a, 2', 0, 1, '', '')) = 2  BEGIN PRINT 'TEST018 - SQLFUN: OK!' END
+if (select dbo.SQLFUN('', 'select 11 a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST016 - SQLFUN: OK!' END
+if (select dbo.SQLFUN(null, 'select 11 a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST016 - SQLFUN: OK!' END
 
 
 
