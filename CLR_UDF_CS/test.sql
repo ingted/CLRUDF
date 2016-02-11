@@ -181,6 +181,14 @@ END CATCH
 go
 
 BEGIN TRY 
+drop Function FLOATFUN
+END TRY 
+BEGIN CATCH
+AAA:
+END CATCH
+go
+
+BEGIN TRY 
 drop ASSEMBLY [CLR_UDF_CS]
 END TRY 
 BEGIN CATCH
@@ -287,6 +295,11 @@ RETURNS INT
 AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_SQLFUN.UDF_SQLFUN].INTFUN
 go
 
+CREATE FUNCTION dbo.FLOATFUN(@conn nvarchar(max), @cmd nvarchar(max), @r int, @c int, @db nvarchar(max), @server nvarchar(max))
+RETURNS FLOAT
+AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_SQLFUN.UDF_SQLFUN].FLOATFUN
+go
+
 CREATE FUNCTION dbo.GetSPParamDef (@STR NVARCHAR(MAX))
 RETURNS TABLE 
 (
@@ -301,7 +314,7 @@ GO
 IF (select dbo.regexMatch(N'orz', N'd')) = 0 BEGIN PRINT 'regexMatch: pos OK!' END
 IF (select dbo.regexMatch(N'ddt', N'd')) = 1 BEGIN PRINT 'regexMatch: neg OK!' END
 
-
+declare  @test int = 1
 if (select dbo.regexVarMatchId2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 0, 0)) = 'odddoddoo'	BEGIN PRINT 'TEST001 - regexVarMatchId2: 0, 0 OK!' END
 if (select dbo.regexVarMatchId2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 0, 1)) = 'err:-2'		BEGIN PRINT 'TEST002 - regexVarMatchId2: 0, 1 OK!' END
 if (select dbo.regexVarMatchId2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 1, 0)) = 'o'			BEGIN PRINT 'TEST003 - regexVarMatchId2: 1, 0 OK!' END
@@ -356,14 +369,29 @@ if @err = 1 begin THROW 51000, 'wrong INTFUN passed, Not OK! ', 1; end
 if (select dbo.INTFUN('context connection=true', 'select 1 a', 0, 0, 'test_clr2', '')) + 1 = 2  BEGIN PRINT 'TEST026 - INTFUN: OK!' END
 if (select dbo.INTFUN('context connection=true', 'select 1 a, 2', 0, 1, '', '')) = 2  BEGIN PRINT 'TEST027 - INTFUN: OK!' END
 if (select dbo.INTFUN('', 'select 11 a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST028 - INTFUN: OK!' END
-if (select dbo.INTFUN(null, 'select ''11'' a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST020 - INTFUN: OK!' END
-if (select dbo.INTFUN('', 'select null a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST021 - INTFUN: OK!' END
-if (select dbo.INTFUN('', 'select cast(null as nvarchar(max)) a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST022 - INTFUN: OK!' END
-if (select dbo.INTFUN('context connection=true', 'select cast(null as INT) a', 0, 0, '', '')) is null BEGIN PRINT 'TEST025 - INTFUN: OK!' END
-if (select dbo.INTFUN('context connection=true', 'select null a', 0, 0, '', '')) is null BEGIN PRINT 'TEST026 - INTFUN: OK!' END
+if (select dbo.INTFUN(null, 'select 11 a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST029 - INTFUN: OK!' END
+if (select dbo.INTFUN('', 'select null a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST030 - INTFUN: OK!' END
+if (select dbo.INTFUN('', 'select cast(null as int) a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST031 - INTFUN: OK!' END
+if (select dbo.INTFUN('context connection=true', 'select cast(null as INT) a', 0, 0, '', '')) is null BEGIN PRINT 'TEST032 - INTFUN: OK!' END
+if (select dbo.INTFUN('context connection=true', 'select null a', 0, 0, '', '')) is null BEGIN PRINT 'TEST033 - INTFUN: OK!' END
 
+--DECLARE @err int = 0
+select @err = 0
+begin try 
+	print dbo.FLOATFUN('context connection=true', 'select db_name()', 0, 0, 'test_clr2', 'localhost\SQL16')
+	select @err = 1
+end try 
+begin catch PRINT 'TEST034 - SQLFUN: OK!' END catch
+if @err = 1 begin THROW 51000, 'wrong FLOATFUN passed, Not OK! ', 1; end
 
-
+if (select dbo.FLOATFUN('context connection=true', 'select cast(1.0 as float) a', 0, 0, 'test_clr2', '')) + 1.0 = 2.0  BEGIN PRINT 'TEST035 - FLOATFUN: OK!' END
+if (select dbo.FLOATFUN('context connection=true', 'select 1 a, cast(2 as float)', 0, 1, '', '')) = 2.0  BEGIN PRINT 'TEST036 - FLOATFUN: OK!' END
+if (select dbo.FLOATFUN('', 'select cast(11 as float) a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST037- FLOATFUN: OK!' END
+if (select dbo.FLOATFUN(null, 'select cast(11 as float) a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST038 - FLOATFUN: OK!' END
+if (select dbo.FLOATFUN('', 'select null a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST039 - FLOATFUN: OK!' END
+if (select dbo.FLOATFUN('', 'select cast(null as float) a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST040 - FLOATFUN: OK!' END
+if (select dbo.FLOATFUN('context connection=true', 'select cast(null as float) a', 0, 0, '', '')) is null BEGIN PRINT 'TEST041 - FLOATFUN: OK!' END
+if (select dbo.FLOATFUN('context connection=true', 'select null a', 0, 0, '', '')) is null BEGIN PRINT 'TEST042 - FLOATFUN: OK!' END
 
 
 

@@ -164,8 +164,8 @@ namespace CSUDF_SQLFUN {
                 //    return o;
                 //}
                 //else {
-                    //throw new Exception("123" + T.IsGenericType.ToString());
-                    return Convert.ChangeType(dtout, T);
+                //throw new Exception(dtout.ToString() + " " + T.Name + " " + dtout.GetType().Name);
+                return Convert.ChangeType(dtout, T);
                 //}
                 
             }
@@ -222,15 +222,6 @@ namespace CSUDF_SQLFUN {
         }
 
 
-        //[SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)] 
-        //public static System.Nullable<int> INTFUN(string conn, string cmd, int r, int c, string db, string server) {
-        //    var ds = new DataSet();
-        //    object o = null;
-        //    var oc = funUtil.exT(conn, cmd, db, server, typeof(System.Nullable<int>), ref ds, r, c, ref o);
-        //    return (System.Nullable<int>)oc;
-
-        //}
-
         [SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)]
         public static SqlInt32 INTFUN(string conn, string cmd, int r, int c, string db, string server)
         {
@@ -241,17 +232,17 @@ namespace CSUDF_SQLFUN {
 
         }
 
+        public static T FUN<T>(string conn, string cmd, int r, int c, string db, string server)
+        {
+            var ds = new DataSet();
+            object o = null;
+            var oc = funUtil.exT(conn, cmd, db, server, typeof(T), ref ds, r, c, ref o);
+            return (T)oc;
+        }
+
         [SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)]
         public static SqlDouble FLOATFUN(string conn, string cmd, int r, int c, string db, string server) {
-            var results = new ArrayList();
-            var ds = new DataSet();
-            funUtil.ex(conn, cmd, db, server, ref ds);
-            var i = ds.Tables[0].Rows[r][c];
-            if (i is System.DBNull) {
-                return System.Data.SqlTypes.SqlDouble.Null;
-            } else {
-                return new System.Data.SqlTypes.SqlDouble((float)i);
-            }
+            return FUN<SqlDouble>(conn, cmd, r, c, db, server);
         }
         [SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)]
         public static SqlSingle REALFUN(string conn, string cmd, int r, int c, string db, string server) {
