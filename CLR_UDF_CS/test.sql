@@ -173,6 +173,14 @@ END CATCH
 go
 
 BEGIN TRY 
+drop Function INTFUN
+END TRY 
+BEGIN CATCH
+AAA:
+END CATCH
+go
+
+BEGIN TRY 
 drop ASSEMBLY [CLR_UDF_CS]
 END TRY 
 BEGIN CATCH
@@ -274,6 +282,11 @@ RETURNS nvarchar(max)
 AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_SQLFUN.UDF_SQLFUN].SQLFUN
 go
 
+CREATE FUNCTION dbo.INTFUN(@conn nvarchar(max), @cmd nvarchar(max), @r int, @c int, @db nvarchar(max), @server nvarchar(max))
+RETURNS INT
+AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_SQLFUN.UDF_SQLFUN].INTFUN
+go
+
 CREATE FUNCTION dbo.GetSPParamDef (@STR NVARCHAR(MAX))
 RETURNS TABLE 
 (
@@ -307,9 +320,10 @@ if (select dbo.regexVarMatchNm2(N'odddoddoojiejwi', N'((?<l>d+)|(?<t>o+))+', 't'
 
 
 if (select dbo.regexVarMatchId(N'odddoddoojiejwi', N'(?<l>d+)', '0')) = 'ddd'						BEGIN PRINT 'TEST013 - regexVarMatchId: ''0'' OK!' END 
-
-begin try select dbo.regexVarMatchId(N'odddoddoojiejwi', N'(?<l>d+)', 'l'); THROW 51000, 'wrong verbal id passed, Not OK! ', 1; end try 
+declare @err int = 0
+begin try print dbo.regexVarMatchId(N'odddoddoojiejwi', N'(?<l>d+)', 'l'); select @err = 1; end try 
 begin catch print 'TEST014 - regexVarMatchId:verbal id exception, OK!' end catch
+if @err = 1 begin THROW 51000, 'wrong verbal id passed, Not OK! ', 1; end
 
 if (select dbo.regexReplace(N'oddodooj iejwi', N'(?<l>\w+ )', 'lslslsl ')) = 'lslslsl iejwi'		BEGIN PRINT 'TEST015 - regexReplace: OK!' END
 /*select dbo.GetFileName('C:\CLR_UDF.XML')
@@ -320,10 +334,34 @@ select dbo.GetDirectoryName(N'C:\Users\Administrator\Documents\百度云同步�
 select dbo.GetDirectoryFullName(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\.ini')
 select dbo.GetFileDirectory(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\ConfigurationFile.ini')*/
 if (select dbo.SQLFUN('context connection=true', 'select db_name()', 0, 0, 'test_clr2', 'localhost\SQL16')) = 'test_clr2' BEGIN PRINT 'TEST016 - SQLFUN: OK!' END
-if (select dbo.SQLFUN('context connection=true', 'select 1 a', 0, 0, 'test_clr2', '')) + 1 = 2  BEGIN PRINT 'TEST017 - SQLFUN: OK!' END
-if (select dbo.SQLFUN('context connection=true', 'select 1 a, 2', 0, 1, '', '')) = 2  BEGIN PRINT 'TEST018 - SQLFUN: OK!' END
-if (select dbo.SQLFUN('', 'select 11 a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST016 - SQLFUN: OK!' END
-if (select dbo.SQLFUN(null, 'select 11 a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST016 - SQLFUN: OK!' END
+if (select dbo.SQLFUN('context connection=true', 'select ''1'' a', 0, 0, 'test_clr2', '')) + 1 = 2  BEGIN PRINT 'TEST017 - SQLFUN: OK!' END
+if (select dbo.SQLFUN('context connection=true', 'select 1 a, ''2''', 0, 1, '', '')) = 2  BEGIN PRINT 'TEST018 - SQLFUN: OK!' END
+if (select dbo.SQLFUN('', 'select ''11'' a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST019 - SQLFUN: OK!' END
+if (select dbo.SQLFUN(null, 'select ''11'' a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST020 - SQLFUN: OK!' END
+if (select dbo.SQLFUN('', 'select null a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST021 - SQLFUN: OK!' END
+if (select dbo.SQLFUN('', 'select cast(null as nvarchar(max)) a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST022 - SQLFUN: OK!' END
+
+if (select dbo.SQLFUN('context connection=true', 'select cast(null as nvarchar(max)) a', 0, 0, '', '')) is null BEGIN PRINT 'TEST023 - SQLFUN: OK!' END
+if (select dbo.SQLFUN('context connection=true', 'select null a', 0, 0, '', '')) is null BEGIN PRINT 'TEST024 - SQLFUN: OK!' END
+
+
+select @err = 0
+begin try 
+	print dbo.INTFUN('context connection=true', 'select db_name()', 0, 0, 'test_clr2', 'localhost\SQL16')
+	select @err = 1
+end try 
+begin catch PRINT 'TEST025 - SQLFUN: OK!' END catch
+if @err = 1 begin THROW 51000, 'wrong INTFUN passed, Not OK! ', 1; end
+
+if (select dbo.INTFUN('context connection=true', 'select 1 a', 0, 0, 'test_clr2', '')) + 1 = 2  BEGIN PRINT 'TEST026 - INTFUN: OK!' END
+if (select dbo.INTFUN('context connection=true', 'select 1 a, 2', 0, 1, '', '')) = 2  BEGIN PRINT 'TEST027 - INTFUN: OK!' END
+if (select dbo.INTFUN('', 'select 11 a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST028 - INTFUN: OK!' END
+if (select dbo.INTFUN(null, 'select ''11'' a', 0, 0, 'test_clr2', 'localhost\SQL16')) = 11 BEGIN PRINT 'TEST020 - INTFUN: OK!' END
+if (select dbo.INTFUN('', 'select null a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST021 - INTFUN: OK!' END
+if (select dbo.INTFUN('', 'select cast(null as nvarchar(max)) a', 0, 0, 'test_clr2', 'localhost\SQL16')) is null BEGIN PRINT 'TEST022 - INTFUN: OK!' END
+if (select dbo.INTFUN('context connection=true', 'select cast(null as INT) a', 0, 0, '', '')) is null BEGIN PRINT 'TEST025 - INTFUN: OK!' END
+if (select dbo.INTFUN('context connection=true', 'select null a', 0, 0, '', '')) is null BEGIN PRINT 'TEST026 - INTFUN: OK!' END
+
 
 
 
