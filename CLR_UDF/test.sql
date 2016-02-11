@@ -319,7 +319,7 @@ select dbo.GetFileContent('C:\CLR_UDF.XML')
 select dbo.GetDirectoryName(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\.ini')
 select dbo.GetDirectoryFullName(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\.ini')
 select dbo.GetFileDirectory(N'C:\Users\Administrator\Documents\百度云同步盘\SQL Server Init\ConfigurationFile.ini')*/
-select dbo.SQLFUN('context connection=true', 'select 1 a', 0, 0)
+select dbo.SQLFUN('context connection=true', 'select 5 a, 2 b', 0, 0)
 
 
 

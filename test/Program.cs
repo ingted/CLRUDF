@@ -10,6 +10,12 @@ namespace test
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("\\s*@(?<nm>\\w+)\\s*" +
+                "(?<type>[^\\s\\(]+\\s*\\(\\s*((\\w+\\s*\\))|(\\d+\\s*\\))|(\\d+\\s*,\\s*\\d+\\s*\\))))\\s*=\\s*" +
+                "(?<defvalueStr>((?<!(?-i)N*')(?<defvalue>\\w+)\\s*)|((?-i)N*'" +
+                "(?<defvalue>(((?<![^']')''(?!'[^']))|([^']))*)" +
+                "'))\\s*(,|\\))");
+            Console.ReadLine();
             Object o = 123;
             if (o is int)
             {

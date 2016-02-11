@@ -181,7 +181,65 @@ END CATCH
 go
 
 BEGIN TRY 
+drop Function DTFUN
+END TRY 
+BEGIN CATCH
+AAA:
+END CATCH
+go
+
+BEGIN TRY 
+drop Function REALFUN
+END TRY 
+BEGIN CATCH
+AAA:
+END CATCH
+go
+
+BEGIN TRY 
 drop Function FLOATFUN
+END TRY 
+BEGIN CATCH
+AAA:
+END CATCH
+go
+
+BEGIN TRY 
+drop Function [Replicate]
+END TRY 
+BEGIN CATCH
+AAA:
+END CATCH
+go
+
+
+BEGIN TRY 
+drop Function Split2String
+END TRY 
+BEGIN CATCH
+AAA:
+END CATCH
+go
+
+BEGIN TRY 
+drop Function Split2StringDist
+END TRY 
+BEGIN CATCH
+AAA:
+END CATCH
+go
+
+
+BEGIN TRY 
+drop Function Split2Int
+END TRY 
+BEGIN CATCH
+AAA:
+END CATCH
+go
+
+BEGIN TRY 
+drop Function Split2IntDist
 END TRY 
 BEGIN CATCH
 AAA:
@@ -200,10 +258,35 @@ begin try
 CREATE ASSEMBLY [CLR_UDF_CS]
 AUTHORIZATION [dbo]
 from 'E:\CLR_String\CLR_UDF_CS\bin\Debug\CLR_UDF_CS.dll'
-with permission_set = unsafe
+with permission_set = safe
 end try
 begin catch 
 aaa:
+return
+end catch
+GO
+
+begin try
+CREATE ASSEMBLY [System.Web]
+AUTHORIZATION [dbo]
+from 'C:\System.Web.dll'
+with permission_set = safe
+end try
+begin catch 
+aaa:
+return
+end catch
+GO
+
+begin try
+CREATE ASSEMBLY [System.Web.Extensions]
+AUTHORIZATION [dbo]
+from 'C:\System.Web.Extensions.dll'
+with permission_set = safe
+end try
+begin catch 
+aaa:
+return
 end catch
 GO
 
@@ -294,6 +377,56 @@ CREATE FUNCTION dbo.INTFUN(@conn nvarchar(max), @cmd nvarchar(max), @r int, @c i
 RETURNS INT
 AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_SQLFUN.UDF_SQLFUN].INTFUN
 go
+
+CREATE FUNCTION dbo.DTFUN(@conn nvarchar(max), @cmd nvarchar(max), @r int, @c int, @db nvarchar(max), @server nvarchar(max))
+RETURNS DATETIME
+AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_SQLFUN.UDF_SQLFUN].DTFUN
+go
+
+CREATE FUNCTION dbo.REALFUN(@conn nvarchar(max), @cmd nvarchar(max), @r int, @c int, @db nvarchar(max), @server nvarchar(max))
+RETURNS REAL
+AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_SQLFUN.UDF_SQLFUN].REALFUN
+go
+
+CREATE FUNCTION dbo.[Replicate](@str nvarchar(max), @times int)
+RETURNS nvarchar(max)
+AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_STR.UDF_STR].[Replicate]
+go	
+
+
+CREATE FUNCTION dbo.Split2String(@target nvarchar(max), @splitter nvarchar(max))
+RETURNS table (
+	id int,
+	value nvarchar(max)
+)
+AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_STR.UDF_STR].Split2String
+go	
+
+
+CREATE FUNCTION dbo.Split2Int(@target nvarchar(max), @splitter nvarchar(max))
+RETURNS table (
+	id int,
+	value int
+)
+AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_STR.UDF_STR].Split2Int
+go	
+
+CREATE FUNCTION dbo.Split2StringDist(@target nvarchar(max), @splitter nvarchar(max))
+RETURNS table (
+	id int,
+	value nvarchar(max)
+)
+AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_STR.UDF_STR].Split2StringDist
+go	
+
+
+CREATE FUNCTION dbo.Split2IntDist(@target nvarchar(max), @splitter nvarchar(max))
+RETURNS table (
+	id int,
+	value int
+)
+AS EXTERNAL NAME  [CLR_UDF_CS].[CSUDF_STR.UDF_STR].Split2IntDist
+go	
 
 CREATE FUNCTION dbo.FLOATFUN(@conn nvarchar(max), @cmd nvarchar(max), @r int, @c int, @db nvarchar(max), @server nvarchar(max))
 RETURNS FLOAT
@@ -393,6 +526,24 @@ if (select dbo.FLOATFUN('', 'select cast(null as float) a', 0, 0, 'test_clr2', '
 if (select dbo.FLOATFUN('context connection=true', 'select cast(null as float) a', 0, 0, '', '')) is null BEGIN PRINT 'TEST041 - FLOATFUN: OK!' END
 if (select dbo.FLOATFUN('context connection=true', 'select null a', 0, 0, '', '')) is null BEGIN PRINT 'TEST042 - FLOATFUN: OK!' END
 
+--ONLY PARTIAL
+if (select dbo.REALFUN('context connection=true', 'select cast(1.0 as REAL) a', 0, 0, 'test_clr2', '')) + 2.0 = 3.0  BEGIN PRINT 'TEST043 - REALFUN: OK!' END
 
 
+if (select dbo.DTFUN('context connection=true', 'select cast(''2010'' as DATETIME) a', 0, 0, 'test_clr2', '')) = '2010-01-01'  BEGIN PRINT 'TEST044 - DTFUN: OK!' END
 
+if (select dbo.PadLeft('ff', 5, 'o')) = 'oooff' begin print 'padleft ok!' end
+if (select dbo.PadLeft('fffffffff', 5, 'o')) = 'fffffffff' begin print 'padleft ok!' end
+
+if (select dbo.PadRight('ff', 5, 'o')) = 'ffooo' begin print 'PadRight ok!' end
+if (select dbo.PadRight('fffffffff', 5, 'o')) = 'fffffffff' begin print 'PadRight ok!' end
+
+
+if (SELECT DBO.[Replicate]('123', 4)) = '123123123123' begin print 'replicate ok!' end
+
+
+select * from dbo.Split2String('dddfffdddfffdddfff123ddd', 'ddd')
+select * from dbo.Split2Int('5234512345123451', '45')
+
+select * from dbo.Split2StringDist('dddfffdddfffdddfff123ddd', 'ddd')
+select * from dbo.Split2IntDist('5234512345123451', '45')

@@ -188,36 +188,11 @@ namespace CSUDF_SQLFUN {
 
     }
     public class UDF_SQLFUN {
-        //[SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)]
-        //public static SqlString SQLFUN(string conn, string cmd, int r, int c, string db, string server) {
-        //    var ds = new DataSet();
-        //    object o = null;
-        //    funUtil.ex(conn, cmd, db, server, ref ds, r, c, ref o);
-        //    if (conn == "" || conn == null)
-        //    {
-        //        var results = new ArrayList();
-        //        var i = ds.Tables[0].Rows[r][c];
-        //        if (i is System.DBNull)
-        //        {
-        //            return System.Data.SqlTypes.SqlString.Null;
-        //        }
-        //        else {
-        //            return new System.Data.SqlTypes.SqlString(i.ToString());
-        //        }
-        //    } else
-        //    {
-        //        return (System.Data.SqlTypes.SqlString)o.ToString();
-        //    }
-        //}
-
+        
         [SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)]
         public static SqlString SQLFUN(string conn, string cmd, int r, int c, string db, string server)
         {
-            var ds = new DataSet();
-            object o = null;
-            var oc = funUtil.exT(conn, cmd, db, server, typeof(SqlString), ref ds, r, c, ref o);
-            //return oc == null ? SqlString.Null : (SqlString)oc;
-            return (SqlString)oc;
+            return FUN<SqlString>(conn, cmd, r, c, db, server);
 
         }
 
@@ -225,10 +200,7 @@ namespace CSUDF_SQLFUN {
         [SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)]
         public static SqlInt32 INTFUN(string conn, string cmd, int r, int c, string db, string server)
         {
-            var ds = new DataSet();
-            object o = null;
-            var oc = funUtil.exT(conn, cmd, db, server, typeof(SqlInt32), ref ds, r, c, ref o);
-            return (SqlInt32)oc;
+            return FUN<SqlInt32>(conn, cmd, r, c, db, server);
 
         }
 
@@ -246,41 +218,17 @@ namespace CSUDF_SQLFUN {
         }
         [SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)]
         public static SqlSingle REALFUN(string conn, string cmd, int r, int c, string db, string server) {
-            var results = new ArrayList();
-            var ds = new DataSet();
-            funUtil.ex(conn, cmd, db, server, ref ds);
-            var i = ds.Tables[0].Rows[r][c];
-            if (i is System.DBNull) {
-                return System.Data.SqlTypes.SqlSingle.Null;
-            } else {
-                return new System.Data.SqlTypes.SqlSingle((Single)i);
-            }
+            return FUN<SqlSingle>(conn, cmd, r, c, db, server);
         }
 
         [SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)]
         public static SqlDateTime DTFUN(string conn, string cmd, int r, int c, string db, string server) {
-            var results = new ArrayList();
-            var ds = new DataSet();
-            funUtil.ex(conn, cmd, db, server, ref ds);
-            var i = ds.Tables[0].Rows[r][c];
-            if (i is System.DBNull) {
-                return System.Data.SqlTypes.SqlDateTime.Null;
-            } else {
-                return new System.Data.SqlTypes.SqlDateTime((DateTime)i);
-            }
+            return FUN<SqlDateTime>(conn, cmd, r, c, db, server);
         }
 
         [SqlFunction(IsDeterministic = false, IsPrecise = true, DataAccess = DataAccessKind.Read)]
         public static SqlBoolean BITFUN(string conn, string cmd, int r, int c, string db, string server) {
-            var results = new ArrayList();
-            var ds = new DataSet();
-            funUtil.ex(conn, cmd, db, server, ref ds);
-            var i = ds.Tables[0].Rows[r][c];
-            if (i is System.DBNull) {
-                return System.Data.SqlTypes.SqlBoolean.Null;
-            } else {
-                return new System.Data.SqlTypes.SqlBoolean((bool)i);
-            }
+            return FUN<SqlBoolean>(conn, cmd, r, c, db, server);
         }
 
     }
