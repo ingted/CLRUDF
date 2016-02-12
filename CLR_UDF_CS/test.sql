@@ -266,29 +266,35 @@ return
 end catch
 GO
 
-begin try
-CREATE ASSEMBLY [System.Web]
-AUTHORIZATION [dbo]
-from 'C:\System.Web.dll'
-with permission_set = safe
-end try
-begin catch 
-aaa:
-return
-end catch
-GO
+--begin try
+--CREATE ASSEMBLY [System.Web]
+--AUTHORIZATION [dbo]
+--from 'C:\System.Web.dll'
+--with permission_set = safe
+--end try
+--begin catch 
+--aaa:
+--return
+--end catch
+--GO
 
-begin try
-CREATE ASSEMBLY [System.Web.Extensions]
-AUTHORIZATION [dbo]
-from 'C:\System.Web.Extensions.dll'
-with permission_set = safe
-end try
-begin catch 
-aaa:
-return
-end catch
-GO
+--CREATE ASSEMBLY [System.Drawing]
+--AUTHORIZATION [dbo]
+--from 'C:\System.Runtime.Serialization.dll'
+--with permission_set = safe
+
+
+--begin try
+--CREATE ASSEMBLY [System.Web.Extensions]
+--AUTHORIZATION [dbo]
+--from 'C:\System.Web.Extensions.dll'
+--with permission_set = safe
+--end try
+--begin catch 
+--aaa:
+--return
+--end catch
+--GO
 
 
 

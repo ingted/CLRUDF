@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Web.Script.Serialization;
+//using System.Web.Script.Serialization;
 
 namespace CSUDF_STR {
     public static class strUtil {
@@ -99,7 +99,7 @@ namespace CSUDF_STR {
         }
         public static ArrayList Split2T<T>(string target, string splitter, bool ifDistinct)
         {
-            JavaScriptSerializer jss = new JavaScriptSerializer();
+            //JavaScriptSerializer jss = new JavaScriptSerializer();
             var results = new ArrayList();
             int idx = 0;
             var tmp = target.Split(new[] { splitter }, StringSplitOptions.None);
@@ -116,28 +116,29 @@ namespace CSUDF_STR {
                 //throw new Exception(Nullable.GetUnderlyingType(typeof(T)).Name);
 
                 var cstrs = typeof(T).GetConstructors();
-                ConstructorInfo cstr = null;
-                ParameterInfo cstrpi = null;
-                int ctrl = 0;
-                foreach (ConstructorInfo ci in cstrs)
-                {
-                    var gps = ci.GetParameters();
-                    if (gps.Length == 1)
-                    {
-                        foreach (ParameterInfo pi in gps) {
-                            if (typeof(T).Name == "Sql" + pi.ParameterType.Name)
-                            {
-                                cstrpi = pi;
-                                cstr = ci;
-                                ctrl = 1;
-                                break;
-                            }
-                        }
-                    }
-                    if (ctrl == 1) { break; }
-                }
+                //ConstructorInfo cstr = null;
+                //ParameterInfo cstrpi = null;
+                ParameterInfo cstrpi = cstrs[0].GetParameters()[0];
+                //int ctrl = 0;
+                //foreach (ConstructorInfo ci in cstrs)
+                //{
+                //    var gps = ci.GetParameters();
+                //    if (gps.Length == 1)
+                //    {
+                //        foreach (ParameterInfo pi in gps) {
+                //            if (typeof(T).Name == "Sql" + pi.ParameterType.Name)
+                //            {
+                //                cstrpi = pi;
+                //                //cstr = ci;
+                //                ctrl = 1;
+                //                break;
+                //            }
+                //        }
+                //    }
+                //    if (ctrl == 1) { break; }
+                //}
                 //throw new Exception(typeof(T).GetConstructors()[0].GetParameters().Length.ToString());
-                
+
                 var method = typeof(Convert).GetMethod(
                     "To" + cstrpi.ParameterType.Name, new[] { typeof(String) });
                 //throw new Exception("000");
