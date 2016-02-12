@@ -103,40 +103,44 @@ namespace CSUDF_STR {
             var results = new ArrayList();
             int idx = 0;
             var tmp = target.Split(new[] { splitter }, StringSplitOptions.None);
-            var dist = new HashSet<String>();
+            var dist = new Hashtable();
             foreach(string s in tmp)
             {
-                if(dist.Contains(s) && ifDistinct == true)
+                //throw new Exception("456");
+                bool keyexists = dist.ContainsKey(s);
+                if (keyexists && ifDistinct == true)
                 {
                     continue;
-                } else { dist.Add(s); }
+                }
+                if (!keyexists) { dist.Add(s, null); }
                 var stbl = new SplitTable<T>();
                 stbl.ID = new SqlInt32(idx);
                 //throw new Exception("123");
                 //throw new Exception(Nullable.GetUnderlyingType(typeof(T)).Name);
-
+                
                 var cstrs = typeof(T).GetConstructors();
                 //ConstructorInfo cstr = null;
-                //ParameterInfo cstrpi = null;
-                ParameterInfo cstrpi = cstrs[0].GetParameters()[0];
-                //int ctrl = 0;
-                //foreach (ConstructorInfo ci in cstrs)
-                //{
-                //    var gps = ci.GetParameters();
-                //    if (gps.Length == 1)
-                //    {
-                //        foreach (ParameterInfo pi in gps) {
-                //            if (typeof(T).Name == "Sql" + pi.ParameterType.Name)
-                //            {
-                //                cstrpi = pi;
-                //                //cstr = ci;
-                //                ctrl = 1;
-                //                break;
-                //            }
-                //        }
-                //    }
-                //    if (ctrl == 1) { break; }
-                //}
+                ParameterInfo cstrpi = null;
+                //var cstrpi = cstrs[0].GetParameters()[0];
+                int ctrl = 0;
+                foreach (ConstructorInfo ci in cstrs)
+                {
+                    var gps = ci.GetParameters();
+                    if (gps.Length == 1)
+                    {
+                        foreach (ParameterInfo pi in gps)
+                        {
+                            if (typeof(T).Name == "Sql" + pi.ParameterType.Name)
+                            {
+                                cstrpi = pi;
+                                //cstr = ci;
+                                ctrl = 1;
+                                break;
+                            }
+                        }
+                    }
+                    if (ctrl == 1) { break; }
+                }
                 //throw new Exception(typeof(T).GetConstructors()[0].GetParameters().Length.ToString());
 
                 var method = typeof(Convert).GetMethod(
